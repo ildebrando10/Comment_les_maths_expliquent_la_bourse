@@ -1,0 +1,312 @@
+---
+title: "Comment est ce que les mathématiques expliquent les prix des actions en bourse?"
+author: "Martin ADECHI"
+date: "`r Sys.Date()`"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## **Motivation**
+
+L'essor des marchés financiers a conduit les mathématiciens à formaliser la dynamique des prix des actions en bourse. Comprendre ces évolutions à travers des modèles mathématiques est essentiel pour les acteurs financiers, notamment dans la gestion des risques, la prévision des rendements d'un portefeuille et l'évaluation de la volatilité d'une action. Ce travail vise à répondre à la question fondamentale : **comment les mathématiques permettent-elles d'expliquer et de modéliser l'évolution des prix des actions sur les marchés financiers ?**
+
+## **Notions clés**
+
+Avant d'aborder la suite de ce travail, il est important de clarifier certains termes techniques :
+
+**Action**: Une action est un titre de propriété représentant une part du capital d'une entreprise. En d'autres termes, elle correspond à une fraction de l'entreprise détenue par un investisseur. Les actions reflètent la valeur économique d'une société et sont directement liées à sa capitalisation boursière, selon la relation suivante : $$ Action = \frac{Capitalisation \; boursière}{nombre \; d'actions}$$
+
+**Option**: Une option est un produit dérivé qui confère à son détenteur un droit (mais non une obligation) d'acheter ou de vendre un actif à un prix fixé à l'avance, et ce, dans une période déterminée.
+
+**Rendement**: Le **rendement** représente le bénéfice d'une entreprise à un moment donné. Il peut être calculé à différentes fréquences : rendement journalier, mensuel ou annuel. Le rendement journalier simple mesure le bénéfice relatif des activités d'une entreprise à un instant $t$ et se calcule par la formule suivante :
+
+$$r_t = \frac{P_t - P_{t-1}}{P_{t-1}}$$
+
+Une autre forme de rendement est le **rendement continu** (ou rendement composé), qui exprime le changement marginal du prix d'une action entre les périodes $t-1$ et $t$. Lorsque $r_t$ tend vers zéro, on observe que $\log(r_t + 1) \sim r_t$. Ainsi, on peut reformuler le rendement continu de la manière suivante :
+
+$$
+\begin{align*}
+  r_t &= \frac{P_t}{P_{t-1}} - 1 \implies \\
+  r_t + 1 &= \frac{P_t}{P_{t-1}} \implies \\
+  \log(r_t + 1) &= \log\left(\frac{P_t}{P_{t-1}}\right) \implies \\
+  r_t &= \log\left(\frac{P_t}{P_{t-1}}\right)
+\end{align*}
+$$
+
+Le **rendement continu** ou **rendement logarithmique** est donc exprimé par la formule :
+
+$$ r_t = \log\left(\frac{P_t}{P_{t-1}}\right) $$
+
+Ce type de rendement est couramment utilisé en finance pour la modélisation, car il repose sur l'hypothèse que le rendement des actifs financiers suit une distribution à moyenne nulle.
+
+## Modélisation mathématique
+
+Le **cours des actions** est modélisé par un **mouvement brownien géométrique**. Ce type de mouvement décrit le mouvement aléatoire d'une particule dans un fluide, similaire à une marche aléatoire symétrique. À chaque instant, la valeur du processus a une probabilité de 50 % d'augmenter ou de diminuer. Le modèle mathématique est exprimé par l'équation suivante :
+
+$$
+dS_t = \mu S_t \, dt + \sigma S_t \, dW_t
+$$
+
+où $W_t$ est un mouvement brownien standard. Ce modèle géométrique est plus efficace que le mouvement brownien standard, car contrairement à ce dernier, il inclut une tendance dans le mouvement. En effet, le comportement de nombreuses actions en bourse présente une tendance. De plus, le mouvement brownien arithmétique n'est pas adapté pour décrire l'évolution du prix d'une action, car il supposerait que le rendement total de l'action, $\frac{dX}{dt}$, diminue avec le temps, ce qui va à l'encontre des observations réelles des rendements des actions.
+
+Ainsi, on suppose que le prix d'une action suit un mouvement brownien géométrique, comme dans le modèle de marché de Black et Scholes. Les paramètres $\mu$ et $\sigma$ sont des constantes représentant respectivement la dérive et l'écart-type (volatilité) de l'action. Pour pouvoir utiliser ce modèle, il est nécessaire de déterminer ces paramètres.
+
+Posons $Y_t = \log(X_t)$, où $\log$ désigne le logarithme naturel. D'après la formule d'Ito, nous avons :
+
+$$
+dY_t = \frac{1}{X_t} \, dX_t - \frac{1}{2X_t^2} \, dX_t^2
+$$
+
+Ce qui devient :
+
+$$
+dY_t = \mu \, dt + \sigma \, dW_t - \frac{1}{2X_t^2} \, dX_t^2
+$$
+
+Or, on peut calculer $dX_t^2$ comme suit :
+
+$$
+dX_t^2 = (\mu X_t \, dt + \sigma X_t \, dW_t) \times (\mu X_t \, dt + \sigma X_t \, dW_t) = \frac{\sigma^2}{2} X_t^2 \, dt
+$$
+
+En enlevant le terme supplémentaire, on obtient :
+
+$$
+dY_t = \left( \mu - \frac{\sigma^2}{2} \right) \, dt + \sigma \, dW_t
+$$
+
+En intégrant cette expression, nous avons :
+
+$$
+Y_t = \int_0^t \left( \mu - \frac{\sigma^2}{2} \right) \, ds + \int_0^t \sigma \, dW_s
+$$
+
+Ce qui peut se réécrire sous la forme :
+
+$$
+Y_t = \left( \mu - \frac{\sigma^2}{2} \right) t + \sigma W_t
+$$
+
+Ainsi, le processus $X_t$ peut être exprimé comme l'exponentielle de $Y_t$ :
+
+$$
+X_t = X_0 \exp\left( \left( \mu - \frac{\sigma^2}{2} \right) t + \sigma W_t \right)
+$$
+
+Nous avons ainsi l'expression directe du mouvement brownien géométrique. Toutefois, pour utiliser ce modèle, nous devons déterminer les paramètres $\mu$ et $\sigma$.
+
+En prenant le logarithme des deux côtés, on obtient :
+
+$$
+\log(X_t) = \left( \mu - \frac{\sigma^2}{2} \right) t + \sigma W_t
+$$
+
+De même, pour $X_{t-1}$, on a :
+
+$$
+\log(X_{t-1}) = \left( \mu - \frac{\sigma^2}{2} \right) (t - 1) + \sigma W_{t-1}
+$$
+
+La différence entre ces deux expressions donne :
+
+$$
+\Delta \log(X_t) = \left( \mu - \frac{\sigma^2}{2} \right) + \sigma \Delta W_t
+$$
+
+En moyenne, cela donne :
+
+$$
+E(r_t) = \mu - \frac{\sigma^2}{2}
+$$
+
+et la variance est :
+
+$$
+\text{Var}(r_t) = \sigma^2
+$$
+
+Ainsi, pour une action donnée, le paramètre $\sigma$ représente l'écart-type du rendement de l'action, également appelé sa **volatilité**, et $\mu$ est la moyenne du rendement, à laquelle on ajoute la moitié de la variance du rendement, c'est-à-dire :
+
+$$
+\mu = E(r_t) + \frac{\sigma^2}{2}
+$$
+
+### Simulations sous R
+
+Nous utilisons les données historiques du prix de l'indice boursier SP500. Les observations couvrent la période du 1er Janvier 2002 au 30 Janvier 2025. Pour permettre la réproductibilité des résultats, nous fixons la graine du générateur aléatoire de R. Nous nous intéressons uniquement aux prix de clôture de notre actif pour une fréquence journalière.
+
+```{r}
+set.seed(1023)
+```
+
+Nous chargeons les bibliothèques nécessaire pour notre travail
+
+```{r, warning=FALSE}
+library(Sim.DiffProc)
+library(timeSeries)
+library(xts)
+```
+
+Les données peuvent être téléchargés directement sur Yahoo Finance. Ici nous l'avons déjà fait et stocker en local. IIl est aussi disponible dans le même repertoire que ce fichier.
+
+```{r}
+sp500 = read.csv("GSPC_data_from_2002.csv")
+sp500$date = as.Date(sp500$date)
+sp500 = as.xts(sp500)[,'GSPC.Close']
+summary(sp500)
+```
+
+Nous calculons le rendement continu de notre actif en utilisant la fonction `returns` du package `timeSeries`
+
+```{r}
+ret = returns(sp500, method = 'compound')
+sigma = sd(ret,na.rm = TRUE)
+theta = mean(ret, na.rm = TRUE)+ sigma^2/2
+```
+
+Le package `Sim.DiffProc` propose la fonction `GBM` pour simuler un mouvement brownien géométrique. Les paramètres de cette fonction sont accessibles par la documentation de R. Le mouvement brownien étant un processus stochastique, nous faisons recours à la méthode Monte Carlo. Nous simulons 100 trajectoires différentes et prenons la moyenne de ces simulations comme l'estimation du prix de notre actif.
+
+```{r}
+N = length(sp500)-1
+gbmSim = GBM(N,M = 100,x0 = coredata(sp500)[1],t0 = 0,T = length(sp500),theta = theta, sigma = sigma)
+meanSim = apply(gbmSim,1,mean)
+meanSim = xts(meanSim, order.by =index(sp500))
+```
+
+```{r}
+#plot(gbmSim, plot.type = 'single', col = "blue")
+matplot(index(sp500),gbmSim,type='l',col = 'black',lwd=2)
+lines(index(sp500),coredata(sp500),col = 'red', type = 'l',lwd=3)
+lines(index(sp500),meanSim,col = 'green',lwd=3,type = 'l')
+
+legend("topleft",legend = c("GBM Simulation","SP500 Actual", "Mean Simulation"),
+       col = c("black", "red", "green"),  
+       lwd = c(2, 3, 3),                  
+       lty = c(1, 1, 1))  
+```
+
+```{r}
+plot(merge(sp500,meanSim),multi.panel=F,col = c('red','blue'),lwd=3,lty = c("dashed", "solid"),legend.loc = "topright",main="Observations réelles et simulées")
+
+```
+
+Nous pouvons utiliser notre modèle pour simuler les valeurs futurs de notre actif. Comme précedemment, nous prennons la moyenne des simulations Monte Carlo. Nous simulons les valeurs des 100 prochains jours
+
+```{r}
+N = length(sp500)+2999
+futureSim = GBM(N,M = 50,x0 = coredata(sp500)[1],t0 = 0,T = length(sp500)+3000,theta = theta, sigma = sigma)
+meanFutureSim = apply(futureSim,1,mean)
+```
+
+```{r}
+dates<- seq(from = as.Date("2025-01-31"), by = "day",length.out =3000 )
+ends <- length(dates)
+xlimits <- c(index(sp500)[1], dates[ends])
+ylimits <- c(0,max(max(meanFutureSim),max(meanSim)))
+plot(index(sp500),sp500,xlim = xlimits,ylim = ylimits,col = 'red', type = 'l',lwd=3, xlab = 'times')
+lines(index(sp500),coredata(meanSim),col = 'green',lwd=3,type = 'l')
+abline(v=index(sp500)[length(sp500)],col = 'blue',lwd=2)
+for (i in 1:ncol(futureSim)) {
+  lines(dates, futureSim[(length(sp500)+1):length(meanFutureSim), i], col = 'magenta',lwd=2)  # Bleu clair transparent
+}
+lines(dates,meanFutureSim[(length(sp500)+1):length(meanFutureSim)],col = "yellow",lwd=4)
+```
+
+La figure montre en moyenne une prévision ascendante du cours du SP500. Nous voyons déjà le problème avec ce modèle qui est incapable de prévoire les clashs boursiers. Si un clash boursier se présenterait dans les années à venir, la dynamique du cours de notre indice boursier ne sera pus comparable à ce que modélise le mouvement brownien. C'est le défaut primordial de ce modèle dans la modélisation du prix des actions. Cependant, ce modèle reste un modèle clé dans la modélisation du cours des actifs boursiers. Il est utilisé dans le modèle de Black Scholes pour la valuation du prix des options. Nous allons essayer une deuxième modélisation sur une période n'incluant pas de crash boursier ou de crise financière.
+
+### Application à la prévision du cours de l'action Apple 
+
+Nous considérons le prix de l'action Apple sur la période 2022-2024. Ces valeurs historiques sont utilisées dans la modélisation. Les valeurs des paramètres obtenues sont utilisées dans la prévision de l'année 2025.
+Nous obtenons les données directement à partir de Yahoo Finance via le package `quantmod` de R.
+
+```{r,warning=FALSE}
+library(quantmod)
+getSymbols("AAPL",src = 'yahoo',from = as.Date("2022-01-01"))
+```
+```{r}
+apl_stock = AAPL
+apl_stock = apl_stock[, 'AAPL.Close']
+summary(apl_stock)
+```
+
+
+Nous calculons les valeurs des paramètres $\mu$ et $\sigma$. Les données seront naturellement divisés en deux parties.
+
+```{r}
+apl_stock1 = apl_stock['2022-01-01/2024-12-31']
+apl_stock2 = apl_stock['2025-01-01/2025-03-13']
+
+ret = returns(apl_stock['2022-01-01/2024-12-31'], method = 'compound')
+sigma = sd(ret,na.rm = TRUE)
+theta = mean(ret, na.rm = TRUE)+ sigma^2/2
+
+```
+
+Nous adoptons ici comme précedemment l'approche Monte Carlo en simulant plusieurs trajectoires et en prenant la moyenne de la simulation. Nous faisons dans un cas M = 10 simulations et dans un autre cas M = 1000 simulations. Pour M =10 on a:
+
+```{r}
+N = length(apl_stock1)-1
+gbmSim = GBM(N,M = 10,x0 = coredata(apl_stock1)[1],t0 = 0,T = length(apl_stock1),theta = theta, sigma = sigma)
+meanSim = apply(gbmSim,1,mean)
+```
+
+```{r}
+matplot(index(apl_stock1),gbmSim,type='l',col = 'black',lwd=2,xlab = 'Time',ylab='AAPL price',main = 'Valeurs observées et simulation de M=10 trajectoires')
+lines(index(apl_stock1),coredata(apl_stock1),col = 'red', type = 'l',lwd=3)
+lines(index(apl_stock1),meanSim,col = 'green',lwd=3,type = 'l')
+
+legend("topleft",legend = c("GBM Simulation","AAPL Actual", "Mean Simulation"),
+       col = c("black", "red", "green"),  
+       lwd = c(2, 3, 3),                  
+       lty = c(1, 1, 1))  
+```
+
+
+Pour M = 1000 simulations
+```{r}
+N = length(apl_stock1)-1
+gbmSim = GBM(N,M = 1000,x0 = coredata(apl_stock1)[1],t0 = 0,T = length(apl_stock1),theta = theta, sigma = sigma)
+meanSim = apply(gbmSim,1,mean)
+```
+
+```{r}
+matplot(index(apl_stock1),gbmSim,type='l',col = 'black',lwd=2,xlab = 'Time',ylab='AAPL price',main = 'Valeurs observées et simulation de M=1000 trajectoires')
+lines(index(apl_stock1),coredata(apl_stock1),col = 'red', type = 'l',lwd=3)
+lines(index(apl_stock1),meanSim,col = 'green',lwd=3,type = 'l')
+
+legend("topleft",legend = c("GBM Simulation","AAPL Actual", "Mean Simulation"),
+       col = c("black", "red", "green"),  
+       lwd = c(2, 3, 3),                  
+       lty = c(1, 1, 1))  
+```
+Comme précedemment nous pouvons simuler les valeurs futures qui serviront de prévision.
+
+```{r}
+N = length(apl_stock1)+365
+futureSim = GBM(N,M = 100,x0 = coredata(apl_stock)[1],t0 = 0,T = length(apl_stock1)+366,theta = theta, sigma = sigma)
+meanFutureSim = apply(futureSim,1,mean)
+```
+
+```{r}
+dates<- seq(from = index(apl_stock1)[length(apl_stock1)], by = "day",length.out =367 )
+ends <- length(dates)
+xlimits <- c(index(apl_stock1)[1], dates[ends])
+ylimits <- c(0,max(apply(futureSim, 2,max)))
+## Tracés
+plot(index(apl_stock1),apl_stock1,xlim = xlimits,ylim = ylimits,col = 'red', type = 'l',lwd=2, xlab = 'times',ylab='AAPL price',main='Prévision de 2025 par simulation du mouvement brownien')
+abline(v=index(apl_stock1)[length(apl_stock1)],col = 'blue',lwd=1)
+for (i in 1:ncol(futureSim)) {
+  lines(dates, futureSim[length(apl_stock1):length(meanFutureSim), i], col = 'magenta',lwd=1)  # Bleu clair transparent
+}
+lines(dates,meanFutureSim[length(apl_stock1):length(meanFutureSim)],col = "black",lwd=2)
+legend("topleft",legend = c("Valeurs observés","GBM simulation", "Mean Simulation"),
+       col = c("red", "magenta", "black"),  
+       lwd = c(2, 3, 3),                  
+       lty = c(1, 1, 1))  
+```
+
+
